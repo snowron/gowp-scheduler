@@ -6,6 +6,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
+	"time"
 )
 
 type SchedulerInterface interface {
@@ -31,7 +32,25 @@ func (s SchedulerService) CreateInstantJob(contactsPath string) error {
 }
 
 func (s SchedulerService) CreateScheduleJob(ordersPath string) error {
-	panic("implement me")
+	file, err := readCsvFromFile(ordersPath)
+	if err != nil {
+		return err
+	}
+	orders := parseOrders(file)
+
+	for _, order := range orders {
+		dataTime, err := time.Parse(time.RFC3339, order.Date)
+		if err != nil {
+			return err
+		}
+
+		isBefore := dataTime.Before(time.Now())
+
+		if !order.Completed && !isBefore {
+			s.Client.SendMessage(order.Message, order.Number)
+		}
+	}
+	return nil
 }
 
 func readCsvFromFile(path string) ([][]string, error) {

@@ -39,3 +39,18 @@ func TestCreateInstantJobShouldReturnNilError(t *testing.T) {
 
 	assert.Nil(t, err)
 }
+
+func TestReadCsvFromFileShouldReturnErrorWithWrongPath(t *testing.T) {
+	_, err := readCsvFromFile("./qwe.csv")
+	assert.Error(t, err)
+}
+
+func TestReadCsvFromFileShouldReturnSuccessfullyData(t *testing.T) {
+	expectedData := [][]string{
+		{"Murat", "0539"},
+	}
+	file, err := readCsvFromFile("./test-data/contact.csv")
+
+	assert.Equal(t, expectedData, file)
+	assert.Nil(t, err)
+}
