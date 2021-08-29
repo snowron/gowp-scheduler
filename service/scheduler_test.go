@@ -2,9 +2,10 @@ package service
 
 import (
 	mocks "awesomeProject/.mocks"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestParseContactsShouldParseDataSuccessfully(t *testing.T) {
@@ -32,7 +33,7 @@ func TestCreateInstantJobShouldReturnNilError(t *testing.T) {
 	wpMockclient.EXPECT().SendMessage(gomock.Any(), gomock.Any()).Times(1)
 	service := SchedulerService{Client: wpMockclient}
 	contactPath := "./test-data/contact.csv"
-	err := service.CreateInstantJob(contactPath)
+	err := service.CreateInstantJob(contactPath, "test message")
 	if err != nil {
 		return
 	}

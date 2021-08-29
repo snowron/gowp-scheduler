@@ -19,7 +19,7 @@ type SchedulerService struct {
 	Client client.ChatClient
 }
 
-func (s SchedulerService) CreateInstantJob(contactsPath string) error {
+func (s SchedulerService) CreateInstantJob(contactsPath, message string) error {
 	file, err := readCsvFromFile(contactsPath)
 	if err != nil {
 		return err
@@ -32,7 +32,10 @@ func (s SchedulerService) CreateInstantJob(contactsPath string) error {
 
 	for _, contact := range contacts {
 		fmt.Println(contact.Name, contact.Number)
-		s.Client.SendMessage("Here is the message", contact.Number)
+		err = s.Client.SendMessage(message, contact.Number)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -57,7 +60,10 @@ func (s SchedulerService) CreateScheduleJob(ordersPath string) error {
 		isBefore := dataTime.Before(time.Now())
 
 		if !order.Completed && !isBefore {
-			s.Client.SendMessage(order.Message, order.Number)
+			err = s.Client.SendMessage(order.Message, order.Number)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -89,7 +95,7 @@ func parseContacts(data [][]string) []model.Contact {
 		}
 		contacts = append(contacts, contact)
 	}
-	fmt.Printf("succesfully parsed contacts")
+	fmt.Printf("successfully parsed contacts")
 	return contacts
 }
 
@@ -105,6 +111,6 @@ func parseOrders(data [][]string) []model.Order {
 		orders = append(orders, order)
 	}
 
-	fmt.Printf("succesfully parsed orders")
+	fmt.Printf("successfully parsed orders")
 	return orders
 }

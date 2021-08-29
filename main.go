@@ -3,9 +3,15 @@ package main
 import (
 	"awesomeProject/client"
 	"awesomeProject/service"
+	"bufio"
 	"flag"
+	"fmt"
 	"os"
+	"strings"
 )
+
+const INSTANT = "instant"
+const SCHEDULE = "schedule"
 
 func main() {
 	wpClient := client.WpClient{}
@@ -22,17 +28,39 @@ func main() {
 			return
 		}
 	}
-	if *strategyType == "instant" {
-		err := schedulerService.CreateInstantJob(*contactsPath)
+	if *strategyType == INSTANT {
+		messageText := getFromCli()
+
+		err := schedulerService.CreateInstantJob(*contactsPath, messageText)
 		if err != nil {
 			println(err.Error())
 			os.Exit(1)
 		}
-	} else if *strategyType == "schedule" {
+	} else if *strategyType == SCHEDULE {
 		err := schedulerService.CreateScheduleJob(*ordersPath)
 		if err != nil {
 			println(err.Error())
 			os.Exit(1)
 		}
 	}
+}
+
+func getFromCli() string {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Enter Message: ")
+
+	messageText, _ := reader.ReadString('\n')
+	messageText = strings.Replace(messageText, "\n", "", -1)
+
+	fmt.Println(messageText)
+	fmt.Print("Are You Sure? [y/N] :")
+
+	yesOrNo, _ := reader.ReadString('\n')
+	yesOrNo = strings.Replace(yesOrNo, "\n", "", -1)
+
+	if strings.EqualFold(yesOrNo, "y") {
+		os.Exit(1)
+	}
+
+	return messageText
 }

@@ -3,11 +3,12 @@ package client
 import (
 	"encoding/gob"
 	"fmt"
-	qrcodeTerminal "github.com/Baozisoftware/qrcode-terminal-go"
-	"github.com/Rhymen/go-whatsapp"
 	"os"
 	"sync"
 	"time"
+
+	qrcodeTerminal "github.com/Baozisoftware/qrcode-terminal-go"
+	"github.com/Rhymen/go-whatsapp"
 )
 
 type ChatClient interface {
@@ -15,9 +16,7 @@ type ChatClient interface {
 	SendMessage(message, number string) error
 }
 
-type WpClient struct {
-	connection *whatsapp.Conn
-}
+type WpClient struct{}
 
 var (
 	mx    sync.Mutex
@@ -26,7 +25,8 @@ var (
 
 func (w WpClient) CreateConnection() error {
 	// Start Connection
-	wac, err := whatsapp.NewConn(5 * time.Second)
+	const waitTime = 5
+	wac, err := whatsapp.NewConn(waitTime * time.Second)
 
 	wac.SetClientVersion(2, 2123, 7)
 	if err != nil {
@@ -40,7 +40,6 @@ func (w WpClient) CreateConnection() error {
 		// Restore session
 		session, err = wac.RestoreWithSession(session)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "restoring failed: %v\n", err)
 			return err
 		}
 	} else {
@@ -52,22 +51,21 @@ func (w WpClient) CreateConnection() error {
 		}()
 		session, err = wac.Login(qr)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "error during login: %v\n", err)
+			return err
 		}
 	}
 
 	// Save session
 	err = writeSession(session)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error saving session: %v\n", err)
+		return err
 	}
 
 	<-time.After(1 * time.Second)
 
-	fmt.Printf("login successful, session: %v\n", session)
+	fmt.Println("login successfully")
 	addConnPath(wac)
-	//contact := wac.Store.Contacts
-	//fmt.Println(contact)
+
 	return err
 }
 func readSession() (whatsapp.Session, error) {
@@ -97,14 +95,13 @@ func (w WpClient) SendMessage(message, number string) error {
 		Text: message,
 	}
 
-	msgId, err := wac.Send(msg)
+	msgID, err := wac.Send(msg)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error sending message: %v", err)
 		return err
-	} else {
-		fmt.Println("Message Sent -> ID : " + msgId)
-		return nil
 	}
+
+	fmt.Println("Message Sent -> ID : " + msgID)
+	return nil
 }
 
 func writeSession(session whatsapp.Session) error {
@@ -123,15 +120,15 @@ func writeSession(session whatsapp.Session) error {
 
 func addConnPath(conn *whatsapp.Conn) int {
 	mx.Lock()
-	var connId int = len(conns)
-	conns[connId] = conn
+	var connID = len(conns)
+	conns[connID] = conn
 	mx.Unlock()
-	return connId
+	return connID
 }
 
-func getConn(connId int) *whatsapp.Conn {
+func getConn(connID int) *whatsapp.Conn {
 	mx.Lock()
-	var conn *whatsapp.Conn = conns[connId]
+	var conn = conns[connID]
 	mx.Unlock()
 	return conn
 }
