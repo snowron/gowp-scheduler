@@ -4,6 +4,7 @@ import (
 	"awesomeProject/client"
 	"awesomeProject/model"
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -25,7 +26,12 @@ func (s SchedulerService) CreateInstantJob(contactsPath string) error {
 	}
 	contacts := parseContacts(file)
 
+	if len(contacts) == 0 {
+		return errors.New("contact csv length is zero")
+	}
+
 	for _, contact := range contacts {
+		fmt.Println(contact.Name, contact.Number)
 		s.Client.SendMessage("Here is the message", contact.Number)
 	}
 	return nil
@@ -37,6 +43,10 @@ func (s SchedulerService) CreateScheduleJob(ordersPath string) error {
 		return err
 	}
 	orders := parseOrders(file)
+
+	if len(orders) == 0 {
+		return errors.New("contact csv length is zero")
+	}
 
 	for _, order := range orders {
 		dataTime, err := time.Parse(time.RFC3339, order.Date)
@@ -79,6 +89,7 @@ func parseContacts(data [][]string) []model.Contact {
 		}
 		contacts = append(contacts, contact)
 	}
+	fmt.Printf("succesfully parsed contacts")
 	return contacts
 }
 
@@ -93,5 +104,7 @@ func parseOrders(data [][]string) []model.Order {
 		}
 		orders = append(orders, order)
 	}
+
+	fmt.Printf("succesfully parsed orders")
 	return orders
 }
