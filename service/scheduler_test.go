@@ -54,3 +54,18 @@ func TestReadCsvFromFileShouldReturnSuccessfullyData(t *testing.T) {
 	assert.Equal(t, expectedData, file)
 	assert.Nil(t, err)
 }
+
+func TestCreateScheduleJobShouldReturnNilError(t *testing.T) {
+	mockController := gomock.NewController(t)
+	wpMockclient := mocks.NewMockChatClient(mockController)
+
+	wpMockclient.EXPECT().SendMessage(gomock.Any(), gomock.Any()).Times(1)
+	service := SchedulerService{Client: wpMockclient}
+	ordersPath := "./test-data/orders.csv"
+	err := service.CreateScheduleJob(ordersPath)
+	if err != nil {
+		return
+	}
+
+	assert.Nil(t, err)
+}

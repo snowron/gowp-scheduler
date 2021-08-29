@@ -86,8 +86,8 @@ func parseOrders(data [][]string) []model.Order {
 	var orders []model.Order
 	for _, line := range data {
 		order := model.Order{
-			Message:   line[1],
 			Number:    line[0],
+			Message:   line[1],
 			Date:      line[2],
 			Completed: false,
 		}
