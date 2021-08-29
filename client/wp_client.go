@@ -12,3 +12,11 @@ type ChatClient interface {
 type WpClient struct {
 	connection whatsapp.Conn
 }
+
+func (w WpClient) CreateConnection() error {
+	panic("implement me")
+}
+
+func (w WpClient) SendMessage(message, number string) error {
+	panic("implement me")
+}
