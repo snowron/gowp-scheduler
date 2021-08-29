@@ -28,6 +28,7 @@ func (w WpClient) CreateConnection() error {
 	const waitTime = 5
 	wac, err := whatsapp.NewConn(waitTime * time.Second)
 
+	// nolint:gomnd
 	wac.SetClientVersion(2, 2123, 7)
 	if err != nil {
 		panic(err)
@@ -56,7 +57,7 @@ func (w WpClient) CreateConnection() error {
 	}
 
 	// Save session
-	err = writeSession(session)
+	err = writeSession(&session)
 	if err != nil {
 		return err
 	}
@@ -104,7 +105,7 @@ func (w WpClient) SendMessage(message, number string) error {
 	return nil
 }
 
-func writeSession(session whatsapp.Session) error {
+func writeSession(session *whatsapp.Session) error {
 	file, err := os.Create(os.TempDir() + "/whatsappSession.gob")
 	if err != nil {
 		return err
