@@ -30,7 +30,6 @@ func (w WpClient) CreateConnection() error {
 		Timeout:         waitTime * time.Second,
 		ShortClientName: "gowp-scheduler",
 		LongClientName:  "gowp-scheduler client",
-		ClientVersion:   "2.2123.7",
 	})
 
 	// nolint:gomnd
