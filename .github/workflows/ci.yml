@@ -1,0 +1,26 @@
+on: [push, pull_request]
+name: Tests-linux
+jobs:
+  test:
+    strategy:
+      matrix:
+        go-version: [1.15.x, 1.16.x]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+      - name: Tests
+        run: go test ./...
+    golangci:
+      name: lint
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        - name: golangci-lint
+          uses: golangci/golangci-lint-action@v2
+          with:
+            version: latest
+        - name: Tests
+            run: golangci-lint run -c .golangci.yml
