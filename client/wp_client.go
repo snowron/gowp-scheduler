@@ -3,11 +3,11 @@ package client
 import (
 	"encoding/gob"
 	"fmt"
+	qrcodeTerminal "github.com/Baozisoftware/qrcode-terminal-go"
 	"os"
 	"sync"
 	"time"
 
-	qrcodeTerminal "github.com/Baozisoftware/qrcode-terminal-go"
 	"github.com/Rhymen/go-whatsapp"
 )
 
@@ -26,7 +26,12 @@ var (
 func (w WpClient) CreateConnection() error {
 	// Start Connection
 	const waitTime = 5
-	wac, err := whatsapp.NewConn(waitTime * time.Second)
+	wac, err := whatsapp.NewConnWithOptions(&whatsapp.Options{
+		Timeout:         waitTime * time.Second,
+		ShortClientName: "gowp-scheduler",
+		LongClientName:  "gowp-scheduler client",
+		ClientVersion:   "2.2123.7",
+	})
 
 	// nolint:gomnd
 	wac.SetClientVersion(2, 2123, 7)
@@ -45,15 +50,7 @@ func (w WpClient) CreateConnection() error {
 		}
 	} else {
 		// No saved session -> regular login
-		qr := make(chan string)
-		go func() {
-			terminal := qrcodeTerminal.New()
-			terminal.Get(<-qr).Print()
-		}()
-		session, err = wac.Login(qr)
-		if err != nil {
-			return err
-		}
+		regularLogin(wac)
 	}
 
 	// Save session
@@ -65,7 +62,7 @@ func (w WpClient) CreateConnection() error {
 	<-time.After(1 * time.Second)
 
 	fmt.Println("login successfully")
-	addConnPath(wac)
+	addConn(wac)
 
 	return err
 }
@@ -86,6 +83,15 @@ func readSession() (whatsapp.Session, error) {
 
 func (w WpClient) SendMessage(message, number string) error {
 	wac := getConn(0)
+
+	// Load saved session every send message called for unblock user web interface experience
+	session, err := readSession()
+
+	if err == nil {
+		// Restore session
+		session, _ = wac.RestoreWithSession(session)
+	}
+
 	msg := whatsapp.TextMessage{
 		Info: whatsapp.MessageInfo{
 			RemoteJid: number + "@s.whatsapp.net",
@@ -118,13 +124,26 @@ func writeSession(session *whatsapp.Session) error {
 	}
 	return nil
 }
+func regularLogin(wac *whatsapp.Conn) error {
+	qr := make(chan string)
 
-func addConnPath(conn *whatsapp.Conn) int {
+	go func() {
+		terminal := qrcodeTerminal.New()
+		terminal.Get(<-qr).Print()
+	}()
+
+	_, err := wac.Login(qr)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func addConn(conn *whatsapp.Conn) {
 	mx.Lock()
 	var connID = len(conns)
 	conns[connID] = conn
 	mx.Unlock()
-	return connID
 }
 
 func getConn(connID int) *whatsapp.Conn {

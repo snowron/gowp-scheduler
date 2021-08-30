@@ -1,13 +1,14 @@
 package main
 
 import (
-	"awesomeProject/client"
-	"awesomeProject/service"
 	"bufio"
 	"flag"
 	"fmt"
 	"os"
 	"strings"
+
+	"gowp-scheduler/client"
+	"gowp-scheduler/service"
 )
 
 const INSTANT = "instant"
@@ -28,6 +29,7 @@ func main() {
 			return
 		}
 	}
+
 	if *strategyType == INSTANT {
 		messageText := getFromCli()
 
@@ -58,7 +60,7 @@ func getFromCli() string {
 	yesOrNo, _ := reader.ReadString('\n')
 	yesOrNo = strings.Replace(yesOrNo, "\n", "", -1)
 
-	if strings.EqualFold(yesOrNo, "y") {
+	if !strings.EqualFold(yesOrNo, "y") {
 		os.Exit(1)
 	}
 

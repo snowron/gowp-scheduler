@@ -1,4 +1,4 @@
-module awesomeProject
+module gowp-scheduler
 
 go 1.16
 
