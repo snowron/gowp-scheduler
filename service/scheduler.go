@@ -51,22 +51,32 @@ func (s SchedulerService) CreateScheduleJob(ordersPath string) error {
 		return errors.New("contact csv length is zero")
 	}
 
-	for _, order := range orders {
-		dataTime, err := time.Parse(time.RFC3339, order.Date)
-		if err != nil {
-			return err
-		}
-
-		isBefore := dataTime.Before(time.Now())
-
-		if !order.Completed && !isBefore {
-			err = s.Client.SendMessage(order.Message, order.Number)
+	doneOrders := 0
+	const loopTime = 10
+	// nolint:staticcheck
+	for range time.Tick(time.Second * loopTime) {
+		for _, order := range orders {
+			if doneOrders == len(orders) {
+				return nil
+			}
+			dataTime, err := time.Parse(time.RFC3339, order.Date)
 			if err != nil {
 				return err
 			}
-			order.Completed = true
+
+			isBefore := dataTime.Before(time.Now())
+
+			if !order.Completed && !isBefore {
+				err = s.Client.SendMessage(order.Message, order.Number)
+				if err != nil {
+					return err
+				}
+				order.Completed = true
+				doneOrders++
+			}
 		}
 	}
+
 	return nil
 }
 
@@ -103,8 +113,9 @@ func parseContacts(data [][]string) []model.Contact {
 	return contacts
 }
 
-func parseOrders(data [][]string) []model.Order {
-	var orders []model.Order
+func parseOrders(data [][]string) []*model.Order {
+	orders := make([]*model.Order, 0)
+
 	for _, line := range data {
 		order := model.Order{
 			Number:    line[0],
@@ -112,7 +123,7 @@ func parseOrders(data [][]string) []model.Order {
 			Date:      line[2],
 			Completed: false,
 		}
-		orders = append(orders, order)
+		orders = append(orders, &order)
 	}
 
 	fmt.Printf("successfully parsed orders")
