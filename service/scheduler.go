@@ -64,6 +64,7 @@ func (s SchedulerService) CreateScheduleJob(ordersPath string) error {
 			if err != nil {
 				return err
 			}
+			order.Completed = true
 		}
 	}
 	return nil
