@@ -33,7 +33,7 @@ func TestCreateInstantJobShouldReturnNilError(t *testing.T) {
 
 	wpMockclient.EXPECT().SendMessage(gomock.Any(), gomock.Any()).Times(1)
 	service := SchedulerService{Client: wpMockclient}
-	contactPath := "./test-data/contact.csv"
+	contactPath := "./test-data/contacts.csv"
 	err := service.CreateInstantJob(contactPath, "test message")
 	if err != nil {
 		return
@@ -58,7 +58,7 @@ func TestReadCsvFromFileShouldReturnSuccessfullyData(t *testing.T) {
 	expectedData := [][]string{
 		{"Murat", "90"},
 	}
-	file, err := readCsvFromFile("./test-data/contact.csv")
+	file, err := readCsvFromFile("./test-data/contacts.csv")
 
 	assert.Equal(t, expectedData, file)
 	assert.Nil(t, err)
