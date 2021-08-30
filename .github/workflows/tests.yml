@@ -13,14 +13,14 @@ jobs:
           go-version: ${{ matrix.go-version }}
       - name: Tests
         run: go test ./...
-    golangci:
-      name: lint
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v2
-        - name: golangci-lint
-          uses: golangci/golangci-lint-action@v2
-          with:
-            version: latest
-        - name: Tests
-            run: golangci-lint run -c .golangci.yml
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: latest
+      - name: Tests
+          run: golangci-lint run -c .golangci.yml
