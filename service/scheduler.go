@@ -31,7 +31,6 @@ func (s SchedulerService) CreateInstantJob(contactsPath, message string) error {
 	}
 
 	for _, contact := range contacts {
-		fmt.Println(contact.Name, contact.Number)
 		err = s.Client.SendMessage(message, contact.Number)
 		if err != nil {
 			return err
