@@ -3,11 +3,11 @@ package client
 import (
 	"encoding/gob"
 	"fmt"
-	qrcodeTerminal "github.com/Baozisoftware/qrcode-terminal-go"
 	"os"
 	"sync"
 	"time"
 
+	qrcodeTerminal "github.com/Baozisoftware/qrcode-terminal-go"
 	"github.com/Rhymen/go-whatsapp"
 )
 
@@ -49,7 +49,10 @@ func (w WpClient) CreateConnection() error {
 		}
 	} else {
 		// No saved session -> regular login
-		regularLogin(wac)
+		err = regularLogin(wac)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Save session
@@ -65,6 +68,7 @@ func (w WpClient) CreateConnection() error {
 
 	return err
 }
+
 func readSession() (whatsapp.Session, error) {
 	session := whatsapp.Session{}
 	file, err := os.Open(os.TempDir() + "/whatsappSession.gob")
@@ -88,7 +92,7 @@ func (w WpClient) SendMessage(message, number string) error {
 
 	if err == nil {
 		// Restore session
-		session, _ = wac.RestoreWithSession(session)
+		_, _ = wac.RestoreWithSession(session)
 	}
 
 	msg := whatsapp.TextMessage{
