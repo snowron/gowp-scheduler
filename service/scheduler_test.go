@@ -1,7 +1,8 @@
 package service
 
 import (
-	mocks "awesomeProject/.mocks"
+	"errors"
+	mocks "gowp-scheduler/.mocks"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -46,9 +47,16 @@ func TestReadCsvFromFileShouldReturnErrorWithWrongPath(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestReadCsvFromFileShouldReturnErrorWithEmptyPath(t *testing.T) {
+	_, err := readCsvFromFile("")
+	expectedError := errors.New("path is missing")
+	assert.Error(t, err)
+	assert.Equal(t, expectedError, err)
+}
+
 func TestReadCsvFromFileShouldReturnSuccessfullyData(t *testing.T) {
 	expectedData := [][]string{
-		{"Murat", "0539"},
+		{"Murat", "90"},
 	}
 	file, err := readCsvFromFile("./test-data/contact.csv")
 

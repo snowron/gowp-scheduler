@@ -1,11 +1,11 @@
 package service
 
 import (
-	"awesomeProject/client"
-	"awesomeProject/model"
 	"encoding/csv"
 	"errors"
 	"fmt"
+	"gowp-scheduler/client"
+	"gowp-scheduler/model"
 	"os"
 	"time"
 )
@@ -70,6 +70,9 @@ func (s SchedulerService) CreateScheduleJob(ordersPath string) error {
 }
 
 func readCsvFromFile(path string) ([][]string, error) {
+	if path == "" {
+		return nil, errors.New("path is missing")
+	}
 	csvFile, err := os.Open(path)
 	if err != nil {
 		return nil, err
